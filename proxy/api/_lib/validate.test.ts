@@ -1,23 +1,15 @@
 /**
- * Unit + property tests for `validateInput` (task 1.3).
- *
- * Covers the length bound (Property 5) and the case-insensitive language
- * allowlist with canonical normalization (Property 4), plus the malformed-body
- * and missing/non-string field edge cases.
- *
- * Framework: Vitest. Property tests use fast-check.
+ * Unit + property tests for `validateInput`. Uses Vitest and fast-check.
  */
 import { describe, it, expect } from "vitest";
 import fc from "fast-check";
 import { validateInput } from "./validate.js";
 import { MAX_TEXT_LENGTH, SUPPORTED_LANGUAGES } from "./contract.js";
 
-/** Helper: build a body with a valid language so text-only cases isolate text checks. */
 function withText(text: unknown) {
   return { text, targetLanguage: "Spanish" };
 }
 
-/** Helper: build a body with valid text so language-only cases isolate language checks. */
 function withLanguage(targetLanguage: unknown) {
   return { text: "hello", targetLanguage };
 }
@@ -122,8 +114,7 @@ describe("validateInput — language validation", () => {
   });
 });
 
-describe("validateInput — Property 5: Length bound", () => {
-  // **Validates: Requirements 7.2, 8.4**
+describe("validateInput — length bound property", () => {
   it("accepts iff trimmed text is non-empty and length ≤ MAX_TEXT_LENGTH", () => {
     fc.assert(
       fc.property(fc.string(), (text) => {
@@ -150,11 +141,8 @@ describe("validateInput — Property 5: Length bound", () => {
   });
 });
 
-describe("validateInput — Property 4: Language allowlist", () => {
-  // **Validates: Requirements 3.1, 7.3, 8.4**
+describe("validateInput — language allowlist property", () => {
   it("accepts any casing of a supported language and normalizes to canonical", () => {
-    // Pick a supported language, then generate a random-cased variant of it,
-    // carrying the canonical value alongside so we can assert normalization.
     const casedLanguage = fc
       .constantFrom(...SUPPORTED_LANGUAGES)
       .chain((canonical) =>

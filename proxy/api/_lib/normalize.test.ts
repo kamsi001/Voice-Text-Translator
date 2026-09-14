@@ -1,20 +1,10 @@
 /**
- * Unit + property tests for `normalizeResponse` (task 2.4).
- *
- * Covers the contract shape (Property 3): a successful normalization yields
- * EXACTLY `{ translation, pronunciation, context }` as non-null strings with a
- * non-empty translation, extra provider fields are dropped, and any missing /
- * wrong-typed / empty-translation / non-object input yields `{ ok: false }`.
- *
- * Framework: Vitest. Property tests use fast-check.
- *
- * **Validates: Requirements 8.2, 8.8, 8.9**
+ * Unit + property tests for `normalizeResponse`. Uses Vitest and fast-check.
  */
 import { describe, it, expect } from "vitest";
 import fc from "fast-check";
 import { normalizeResponse } from "./normalize.js";
 
-/** The exact set of fields the contract permits on the normalized value. */
 const CONTRACT_KEYS = ["translation", "pronunciation", "context"] as const;
 
 describe("normalizeResponse — valid input", () => {
@@ -180,12 +170,8 @@ describe("normalizeResponse — non-object / null raw input", () => {
   });
 });
 
-describe("normalizeResponse — Property 3: Contract shape", () => {
-  // **Validates: Requirements 8.2, 8.8, 8.9**
-
+describe("normalizeResponse — contract shape property", () => {
   it("accepts iff translation is a non-empty string and pronunciation/context are strings", () => {
-    // Generate arbitrary values for each of the three fields (mixing strings
-    // with non-strings) so the property exercises accept and reject branches.
     const fieldArb = fc.oneof(
       fc.string(),
       fc.integer(),
@@ -219,7 +205,6 @@ describe("normalizeResponse — Property 3: Contract shape", () => {
   });
 
   it("on success returns exactly the three contract fields with the same values, dropping extras", () => {
-    // Valid core fields plus an arbitrary bag of extra keys that must be dropped.
     const extras = fc.dictionary(
       fc.string().filter((k) => !CONTRACT_KEYS.includes(k as never)),
       fc.anything(),

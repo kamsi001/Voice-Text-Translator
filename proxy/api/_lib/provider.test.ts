@@ -1,32 +1,14 @@
 /**
  * Unit + property tests for `GeminiProvider` and the `TranslationProvider`
- * abstraction (task 2.5).
- *
- * These tests mock the global `fetch` so no network call is made. They assert:
- *  - the request body carries the correct prompt (target language + input text,
- *    strict-JSON instruction with the three contract keys),
- *  - the request body carries the correct `responseSchema` (OBJECT with three
- *    required STRING keys) and `responseMimeType: "application/json"`
- *    (Requirement 6.4),
- *  - the parse path: JSON string inside `candidates[0].content.parts[0].text`
- *    is returned parsed,
- *  - a non-OK HTTP response causes `translate` to throw (Requirement 8.6),
- *  - the API key is placed on the request URL and never leaked in errors.
- *
- * Property 7 (provider swappability): callers depend ONLY on
- * `TranslationProvider.translate`, so a drop-in provider is interchangeable.
- * **Validates: Requirements 6.1, 6.3**
- *
- * Framework: Vitest. Property tests use fast-check.
+ * abstraction. `fetch` is mocked so no network call is made. Uses Vitest and
+ * fast-check.
  */
 import { describe, it, expect, vi, afterEach } from "vitest";
 import fc from "fast-check";
 import { GeminiProvider, type TranslationProvider } from "./provider.js";
 
-/** The exact set of keys the contract / responseSchema must require. */
 const CONTRACT_KEYS = ["translation", "pronunciation", "context"] as const;
 
-/** Build a Gemini-shaped OK response whose candidate text is `jsonText`. */
 function geminiOkResponse(jsonText: string): Response {
   return {
     ok: true,
@@ -37,7 +19,6 @@ function geminiOkResponse(jsonText: string): Response {
   } as unknown as Response;
 }
 
-/** Build a non-OK HTTP response with the given status. */
 function geminiErrorResponse(status: number): Response {
   return {
     ok: false,
@@ -46,7 +27,6 @@ function geminiErrorResponse(status: number): Response {
   } as unknown as Response;
 }
 
-/** Install a `fetch` mock returning `response`; returns the spy for assertions. */
 function mockFetch(response: Response) {
   const spy = vi.fn(async () => response);
   vi.stubGlobal("fetch", spy);
@@ -58,7 +38,6 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-/** Parse the request body passed to the mocked fetch call. */
 function parseRequestBody(spy: ReturnType<typeof vi.fn>) {
   expect(spy).toHaveBeenCalledTimes(1);
   const [, init] = spy.mock.calls[0] as unknown as [string, RequestInit];
@@ -227,15 +206,7 @@ describe("GeminiProvider.translate — API key handling", () => {
   });
 });
 
-describe("Property 7: Provider swappability", () => {
-  // **Validates: Requirements 6.1, 6.3**
-  //
-  // A caller that depends ONLY on `TranslationProvider.translate` must work
-  // with any conforming implementation. We define a trivial stub provider and
-  // assert a generic caller drives it identically to GeminiProvider (same
-  // interface, same return contract) across arbitrary inputs.
-
-  /** Caller that depends solely on the interface — no concrete-type knowledge. */
+describe("provider swappability", () => {
   async function callThrough(
     provider: TranslationProvider,
     text: string,
@@ -249,14 +220,12 @@ describe("Property 7: Provider swappability", () => {
       fc.asyncProperty(fc.string(), fc.string(), async (text, lang) => {
         const payload = { translation: text, pronunciation: "p", context: "c" };
 
-        // Stub provider: an alternative implementation of the same interface.
         const stub: TranslationProvider = {
           translate: async (t, l) => ({ echoedText: t, echoedLang: l }),
         };
         const stubResult = await callThrough(stub, text, lang);
         expect(stubResult).toEqual({ echoedText: text, echoedLang: lang });
 
-        // GeminiProvider: the default implementation, mocked at fetch.
         mockFetch(geminiOkResponse(JSON.stringify(payload)));
         const geminiResult = await callThrough(
           new GeminiProvider("test-key"),

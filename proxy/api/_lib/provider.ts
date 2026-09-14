@@ -1,40 +1,16 @@
 /**
- * Provider-agnostic translation interface and factory (task 2.1).
- *
- * The proxy depends ONLY on {@link TranslationProvider.translate}, so swapping
- * the concrete implementation is a single-file change here — no handler,
- * validator, or normalizer edits required (Property P7, Requirements 6.1, 6.3).
- *
- * {@link getProvider} constructs the default {@link GeminiProvider}, reading the
- * API key EXCLUSIVELY from `process.env.GEMINI_API_KEY` (Requirement 5.1). If
- * that env var is absent or empty the factory throws a {@link MissingConfigError}
- * so the proxy refuses to serve with a missing-configuration error
- * (Requirement 5.2). The key is never logged nor placed in any error message or
- * response body (Property P1, Requirements 5.3, 5.5).
- *
- * NOTE: The full Gemini `translate` implementation (prompt, `generateContent`
- * call, response parsing) is task 2.2. Here `GeminiProvider` only stores the key
- * and exposes the interface so the factory compiles and callers can wire in.
+ * Provider-agnostic translation interface and factory. The rest of the proxy
+ * depends only on {@link TranslationProvider.translate}, so swapping the
+ * concrete implementation is a single change in {@link getProvider}.
  */
 import type { SupportedLanguage } from "./contract.js";
 
-/**
- * Gemini model identifier used in the `generateContent` endpoint path.
- *
- * NOTE: This exact model string (and the `v1beta` API version below) is a
- * build-time-confirmed constant — verify it against the Google AI Studio
- * console before deploying, as Google revises model names/versions over time.
- */
+// Verify against the Google AI Studio console before deploying; Google revises
+// model names and API versions over time.
 const GEMINI_MODEL = "gemini-1.5-flash";
 
-/** Base URL for the Gemini `generateContent` REST endpoint (see NOTE on {@link GEMINI_MODEL}). */
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
-/**
- * `responseSchema` requiring exactly the three contract string keys. Combined
- * with `responseMimeType: "application/json"` this constrains Gemini to emit a
- * JSON object with `translation`, `pronunciation`, and `context` (Requirement 6.4).
- */
 const RESPONSE_SCHEMA = {
   type: "OBJECT",
   properties: {
@@ -45,22 +21,11 @@ const RESPONSE_SCHEMA = {
   required: ["translation", "pronunciation", "context"],
 } as const;
 
-/**
- * Provider-agnostic translation interface. This is the sole translation entry
- * point the rest of the proxy is allowed to depend on. `translate` returns the
- * raw provider payload as `unknown`; the normalizer (task 2.3) coerces it into
- * the contract shape.
- */
 export interface TranslationProvider {
   translate(text: string, targetLanguage: string): Promise<unknown>;
 }
 
-/**
- * Thrown when required provider configuration (the API key) is missing.
- *
- * The message is intentionally generic and NEVER contains the key value, so it
- * is safe to surface as a missing-configuration error and to log.
- */
+/** Thrown when the API key is missing. The message never contains the key. */
 export class MissingConfigError extends Error {
   constructor(message = "Server is missing required configuration.") {
     super(message);
@@ -68,14 +33,6 @@ export class MissingConfigError extends Error {
   }
 }
 
-/**
- * Default {@link TranslationProvider} backed by Gemini Flash.
- *
- * The API key is held privately and is never logged or exposed. The concrete
- * `generateContent` call is implemented in task 2.2; this stub keeps the key so
- * the factory can construct the provider and callers can depend on the
- * interface.
- */
 export class GeminiProvider implements TranslationProvider {
   readonly #apiKey: string;
 
@@ -103,8 +60,6 @@ export class GeminiProvider implements TranslationProvider {
       },
     };
 
-    // The API key is passed only as a query parameter and is NEVER logged nor
-    // placed in any thrown error message (Property P1, Requirements 5.3, 5.5).
     const resp = await fetch(
       `${GEMINI_ENDPOINT}?key=${encodeURIComponent(this.#apiKey)}`,
       {
@@ -115,7 +70,7 @@ export class GeminiProvider implements TranslationProvider {
     );
 
     if (!resp.ok) {
-      // Status only — no key, no request echo. The handler surfaces this as 502.
+      // Status only, so the key and request are never echoed.
       throw new Error(`Gemini HTTP ${resp.status}`);
     }
 
@@ -128,22 +83,14 @@ export class GeminiProvider implements TranslationProvider {
       throw new Error("Gemini response missing candidate text.");
     }
 
-    // JSON.parse throws on malformed output; that propagates to the handler,
-    // which responds 502 per Requirement 8.6.
     return JSON.parse(jsonText);
   }
 }
 
 /**
- * Construct the default {@link TranslationProvider}.
- *
- * Reads the API key exclusively from `process.env.GEMINI_API_KEY`. Throws
- * {@link MissingConfigError} when the key is absent or empty (after trimming) so
- * the proxy refuses to serve. To swap providers later, change only this factory,
- * e.g. `return new OpenAiProvider(process.env.OPENAI_API_KEY!)`.
- *
- * @returns The configured translation provider.
- * @throws {MissingConfigError} When `GEMINI_API_KEY` is missing or empty.
+ * Constructs the default provider from `process.env.GEMINI_API_KEY`. Throws
+ * {@link MissingConfigError} when the key is absent or empty. To swap providers,
+ * change only this factory.
  */
 export function getProvider(): TranslationProvider {
   const apiKey = process.env.GEMINI_API_KEY;
