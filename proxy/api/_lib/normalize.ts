@@ -21,9 +21,7 @@
 import type { TranslateResponse } from "./contract.js";
 
 /** Discriminated result of normalizing raw provider output. */
-export type Normalized =
-  | { ok: true; value: TranslateResponse }
-  | { ok: false };
+export type Normalized = { ok: true; value: TranslateResponse } | { ok: false };
 
 /**
  * Coerce raw provider output into the exact `TranslateResponse` contract shape.

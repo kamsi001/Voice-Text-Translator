@@ -197,15 +197,24 @@ describe("normalizeResponse — Property 3: Contract shape", () => {
     );
 
     fc.assert(
-      fc.property(fieldArb, fieldArb, fieldArb, (translation, pronunciation, context) => {
-        const result = normalizeResponse({ translation, pronunciation, context });
-        const shouldAccept =
-          typeof translation === "string" &&
-          translation.length > 0 &&
-          typeof pronunciation === "string" &&
-          typeof context === "string";
-        expect(result.ok).toBe(shouldAccept);
-      }),
+      fc.property(
+        fieldArb,
+        fieldArb,
+        fieldArb,
+        (translation, pronunciation, context) => {
+          const result = normalizeResponse({
+            translation,
+            pronunciation,
+            context,
+          });
+          const shouldAccept =
+            typeof translation === "string" &&
+            translation.length > 0 &&
+            typeof pronunciation === "string" &&
+            typeof context === "string";
+          expect(result.ok).toBe(shouldAccept);
+        },
+      ),
     );
   });
 
@@ -234,7 +243,11 @@ describe("normalizeResponse — Property 3: Contract shape", () => {
             expect(Object.keys(result.value).sort()).toEqual(
               [...CONTRACT_KEYS].sort(),
             );
-            expect(result.value).toEqual({ translation, pronunciation, context });
+            expect(result.value).toEqual({
+              translation,
+              pronunciation,
+              context,
+            });
           }
         },
       ),

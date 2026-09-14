@@ -142,13 +142,10 @@ describe("validateInput — Property 5: Length bound", () => {
 
   it("never accepts text whose raw length exceeds MAX_TEXT_LENGTH", () => {
     fc.assert(
-      fc.property(
-        fc.string({ minLength: MAX_TEXT_LENGTH + 1 }),
-        (text) => {
-          const result = validateInput({ text, targetLanguage: "Spanish" });
-          expect(result.ok).toBe(false);
-        },
-      ),
+      fc.property(fc.string({ minLength: MAX_TEXT_LENGTH + 1 }), (text) => {
+        const result = validateInput({ text, targetLanguage: "Spanish" });
+        expect(result.ok).toBe(false);
+      }),
     );
   });
 });

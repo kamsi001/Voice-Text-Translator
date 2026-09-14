@@ -21,10 +21,7 @@
  */
 import { describe, it, expect, vi, afterEach } from "vitest";
 import fc from "fast-check";
-import {
-  GeminiProvider,
-  type TranslationProvider,
-} from "./provider.js";
+import { GeminiProvider, type TranslationProvider } from "./provider.js";
 
 /** The exact set of keys the contract / responseSchema must require. */
 const CONTRACT_KEYS = ["translation", "pronunciation", "context"] as const;
@@ -73,7 +70,11 @@ describe("GeminiProvider.translate — request body", () => {
   it("includes the target language and input text in the prompt", async () => {
     const spy = mockFetch(
       geminiOkResponse(
-        JSON.stringify({ translation: "Hola", pronunciation: "OH-lah", context: "greeting" }),
+        JSON.stringify({
+          translation: "Hola",
+          pronunciation: "OH-lah",
+          context: "greeting",
+        }),
       ),
     );
 
@@ -88,7 +89,11 @@ describe("GeminiProvider.translate — request body", () => {
   it("instructs the model to respond as strict JSON with the three contract keys", async () => {
     const spy = mockFetch(
       geminiOkResponse(
-        JSON.stringify({ translation: "Bonjour", pronunciation: "bohn-ZHOOR", context: "greeting" }),
+        JSON.stringify({
+          translation: "Bonjour",
+          pronunciation: "bohn-ZHOOR",
+          context: "greeting",
+        }),
       ),
     );
 
@@ -104,7 +109,11 @@ describe("GeminiProvider.translate — request body", () => {
   it("sets responseMimeType to application/json", async () => {
     const spy = mockFetch(
       geminiOkResponse(
-        JSON.stringify({ translation: "Hallo", pronunciation: "HAH-loh", context: "greeting" }),
+        JSON.stringify({
+          translation: "Hallo",
+          pronunciation: "HAH-loh",
+          context: "greeting",
+        }),
       ),
     );
 
@@ -117,7 +126,11 @@ describe("GeminiProvider.translate — request body", () => {
   it("sets a responseSchema of OBJECT with three required STRING keys", async () => {
     const spy = mockFetch(
       geminiOkResponse(
-        JSON.stringify({ translation: "こんにちは", pronunciation: "kon-ni-chi-wa", context: "greeting" }),
+        JSON.stringify({
+          translation: "こんにちは",
+          pronunciation: "kon-ni-chi-wa",
+          context: "greeting",
+        }),
       ),
     );
 
@@ -141,7 +154,10 @@ describe("GeminiProvider.translate — parse path", () => {
     };
     mockFetch(geminiOkResponse(JSON.stringify(payload)));
 
-    const result = await new GeminiProvider("test-key").translate("hello", "Spanish");
+    const result = await new GeminiProvider("test-key").translate(
+      "hello",
+      "Spanish",
+    );
 
     expect(result).toEqual(payload);
   });
@@ -183,7 +199,11 @@ describe("GeminiProvider.translate — API key handling", () => {
   it("passes the API key on the request URL", async () => {
     const spy = mockFetch(
       geminiOkResponse(
-        JSON.stringify({ translation: "Hola", pronunciation: "OH-lah", context: "greeting" }),
+        JSON.stringify({
+          translation: "Hola",
+          pronunciation: "OH-lah",
+          context: "greeting",
+        }),
       ),
     );
 

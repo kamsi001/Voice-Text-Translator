@@ -101,11 +101,7 @@ function setCorsHeaders(res: VercelResponse): void {
 }
 
 /** Send exactly one JSON response with the given status code. */
-function send(
-  res: VercelResponse,
-  status: 200,
-  body: TranslateResponse,
-): void;
+function send(res: VercelResponse, status: 200, body: TranslateResponse): void;
 function send(res: VercelResponse, status: number, body: ErrorResponse): void;
 function send(
   res: VercelResponse,
