@@ -1,2 +1,8 @@
 .kiro/
 .env
+
+# Node / proxy
+node_modules/
+proxy/node_modules/
+.vercel/
+*.log
