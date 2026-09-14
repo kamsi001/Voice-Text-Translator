@@ -3,6 +3,7 @@ import type { ErrorResponse, TranslateResponse } from "./_lib/contract.js";
 import { validateInput } from "./_lib/validate.js";
 import { getProvider, MissingConfigError } from "./_lib/provider.js";
 import { normalizeResponse } from "./_lib/normalize.js";
+import { clientIp, rateLimiter } from "./_lib/rateLimiter.js";
 
 /**
  * POST /api/translate
@@ -26,6 +27,13 @@ export default async function handler(
 
   if (req.method !== "POST") {
     send(res, 405, { error: "Method not allowed." });
+    return;
+  }
+
+  // Rate limit before validation and the provider call so an abusive client
+  // is rejected without incurring any downstream cost.
+  if (!rateLimiter.allow(clientIp(req))) {
+    send(res, 429, { error: "Too many requests. Please slow down." });
     return;
   }
 
