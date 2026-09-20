@@ -89,6 +89,12 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
+    // Networking: Retrofit over OkHttp with Gson JSON (de)serialization.
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging.interceptor)
+
     testImplementation(libs.junit)
 
     androidTestImplementation(libs.androidx.junit)
