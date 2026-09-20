@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Base application theme. The Compose UI supplies the actual Material 3
+      color scheme at runtime; this XML theme only needs to inherit from a
+      themeless Material 3 parent so the app can host Compose content.
+    -->
+    <style name="Theme.VoiceTextTranslator" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>

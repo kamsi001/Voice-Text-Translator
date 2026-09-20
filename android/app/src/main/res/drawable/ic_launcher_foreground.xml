@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Simple speech-bubble glyph centered within the adaptive icon safe zone. -->
+    <group
+        android:scaleX="2.6"
+        android:scaleY="2.6"
+        android:translateX="27"
+        android:translateY="27">
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M4,2 h12 a2,2 0 0 1 2,2 v8 a2,2 0 0 1 -2,2 h-6 l-4,4 v-4 h-2 a2,2 0 0 1 -2,-2 v-8 a2,2 0 0 1 2,-2 z" />
+    </group>
+</vector>
