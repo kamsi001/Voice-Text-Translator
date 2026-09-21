@@ -2,48 +2,40 @@
 
 A lightweight translation service that turns a word or phrase into its
 translation, a pronunciation guide, and a short note on how to use it in
-context. Built around a small serverless proxy that keeps the AI provider key
-safely on the server, away from client apps.
+context. It pairs a native Android app with a small serverless proxy that keeps
+the AI provider key safely on the server, away from client apps.
 
 ## What it does
 
-Send a piece of text and a target language, and the service returns three
-things:
+Enter a piece of text, pick a target language, and get back three things:
 
 - **Translation** — the phrase in the target language
 - **Pronunciation** — a phonetic guide so you know how to say it
 - **Context** — a brief note on when and how the phrase is used
 
-Day-one supported languages are **Spanish**, **French**, **Japanese**, and
-**German**.
+Supported languages: **Spanish**, **French**, **Japanese**, and **German**.
 
 ## How it works
 
 ```
-Client (mobile / web)
-        │  POST /api/translate
-        ▼
-┌─────────────────────────────┐
-│  Vercel serverless proxy     │
-│                              │
-│  validate → translate →      │
-│  normalize → respond         │
-└─────────────────────────────┘
-        │  holds the API key server-side
-        ▼
-   AI translation provider (Gemini)
+┌─────────────────────┐   POST /api/translate   ┌──────────────────────┐   holds the API key   ┌─────────────────────┐
+│  Android app         │ ──────────────────────► │  Vercel proxy         │ ────────────────────► │  AI provider (Gemini)│
+│  (Jetpack Compose)   │ ◄────────────────────── │  validate · normalize │ ◄──────────────────── │                      │
+└─────────────────────┘        JSON result       └──────────────────────┘                       └─────────────────────┘
 ```
 
-The proxy exists so the AI provider key never ships inside a client app. Every
-request flows through a small, predictable pipeline:
+The proxy exists so the AI provider key never ships inside a client app. Each
+request is validated, forwarded to the translation provider, and normalized into
+a strict, predictable JSON response.
 
-1. **Validate** — reject empty, over-length, or unsupported-language input
-   before any provider call, so bad requests never cost anything.
-2. **Translate** — call the translation provider behind a provider-agnostic
-   interface, so the underlying model can be swapped in one place.
-3. **Normalize** — coerce the provider's raw output into a strict, predictable
-   response shape, dropping anything extra.
-4. **Respond** — return exactly one JSON response with the right status code.
+## Components
+
+| Directory              | What it is                                              |
+| ---------------------- | ------------------------------------------------------- |
+| [`android/`](android/) | Native Android client (Kotlin, Jetpack Compose)         |
+| [`proxy/`](proxy/)     | Vercel serverless proxy exposing `POST /api/translate`  |
+
+Each directory has its own README with setup and run instructions.
 
 ## API
 
@@ -68,7 +60,7 @@ request flows through a small, predictable pipeline:
 }
 ```
 
-**Error responses** return `{ "error": "..." }` with an appropriate status:
+**Errors** return `{ "error": "..." }` with an appropriate status:
 
 | Status | Meaning                                               |
 | ------ | ----------------------------------------------------- |
@@ -77,55 +69,28 @@ request flows through a small, predictable pipeline:
 | `500`  | Server is missing its provider configuration          |
 | `502`  | Provider failed or returned an unusable result        |
 
-## Project structure
+## Getting started
 
-```
-proxy/
-├── api/
-│   ├── translate.ts        # Request handler and response pipeline
-│   └── _lib/
-│       ├── contract.ts     # Shared request/response types and constants
-│       ├── validate.ts     # Input validation and normalization
-│       ├── provider.ts     # Provider interface + Gemini implementation
-│       └── normalize.ts    # Coerces provider output into the contract shape
-└── vercel.json             # Serverless function configuration
-```
-
-## Design highlights
-
-- **Key stays server-side.** The API key is read only from an environment
-  variable and is never logged or included in any response.
-- **Swappable provider.** The rest of the code depends only on a small
-  `TranslationProvider` interface, so changing the AI backend is a single-file
-  change.
-- **Strict, predictable contract.** Both the input and the output are validated
-  and normalized, so clients always get one of a well-defined set of responses.
-
-## Running it yourself
-
-The proxy is a TypeScript project deployed as a Vercel serverless function.
+**Proxy**
 
 ```bash
 cd proxy
 npm install
 ```
 
-Set your translation provider API key as an environment variable, either in a
-local `.env` file or in your Vercel project settings:
+Set your provider API key as an environment variable (locally via `.env` or in
+your Vercel project settings), then deploy the `proxy/` directory to Vercel or
+run it locally with the Vercel CLI:
 
 ```
 GEMINI_API_KEY=your-key-here
 ```
 
-Handy commands:
+**Android app**
 
-```bash
-npm run typecheck   # type-check the project
-npm test            # run the test suite
-```
-
-Then deploy the `proxy/` directory to Vercel, or run it locally with the Vercel
-CLI.
+Open the `android/` folder in Android Studio, point `BASE_URL` at your proxy
+(see [`android/README.md`](android/README.md)), and run it on an emulator or
+device.
 
 ## License
 

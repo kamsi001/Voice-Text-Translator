@@ -11,14 +11,7 @@ import androidx.compose.ui.Modifier
 import com.example.voicetexttranslator.ui.TranslateScreen
 import com.example.voicetexttranslator.ui.theme.VoiceTextTranslatorTheme
 
-/**
- * Single-activity host for the translator UI.
- *
- * Hosts the real [TranslateScreen] (Task 4.4), which collects state from
- * [com.example.voicetexttranslator.ui.TranslationViewModel] and renders the
- * text field, language selector, translate button, and result/loading/error
- * states. Voice input is added in Task 5.
- */
+/** Single-activity host for the translator UI. */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

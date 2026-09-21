@@ -39,25 +39,8 @@ import com.example.voicetexttranslator.data.TranslateResponse
 import com.example.voicetexttranslator.ui.theme.VoiceTextTranslatorTheme
 
 /**
- * The single-screen translator UI (Task 4.4).
- *
- * Renders purely from [TranslationViewModel.UiState] collected via
- * [collectAsState] and delegates all behavior to the view model
- * ([TranslationViewModel.onTextChange], [TranslationViewModel.onLanguageChange],
- * [TranslationViewModel.translate]).
- *
- * Controls (Requirement 9.1):
- *  - one text input field (capped at [MAX_TEXT_LENGTH], Requirements 1.2, 9.2),
- *  - one language selection control offering exactly the four
- *    [SupportedLanguage] values, defaulting to Spanish (Requirements 3.1, 9.2),
- *  - one translate button (Requirement 4.2),
- *  - one result display with three fields and empty-field indicators
- *    (Requirements 1.3, 4.2).
- *
- * Loading and error states are surfaced from state (Requirements 4.1, 4.3).
- *
- * NOTE: The voice input control is added in Task 5; it is intentionally absent
- * here so this task only wires the typed-text flow.
+ * The single-screen translator UI. Renders purely from
+ * [TranslationViewModel.UiState] and delegates all behavior to the view model.
  */
 @Composable
 fun TranslateScreen(
@@ -99,7 +82,6 @@ private fun TranslateScreenContent(
             style = MaterialTheme.typography.headlineSmall,
         )
 
-        // Text input field, capped at MAX_TEXT_LENGTH (Requirements 1.2, 9.2).
         OutlinedTextField(
             value = state.inputText,
             onValueChange = { new ->
@@ -111,15 +93,12 @@ private fun TranslateScreenContent(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        // Language selection control offering exactly the four supported
-        // languages, defaulting to Spanish (Requirements 3.1, 9.2).
         LanguageDropdown(
             selected = state.targetLanguage,
             onLanguageChange = onLanguageChange,
         )
 
-        // Translate button (Requirement 4.2). Disabled while a request is in
-        // flight so the loading state is unambiguous.
+        // Disabled while a request is in flight so the loading state is unambiguous.
         Button(
             onClick = onTranslate,
             enabled = !state.isLoading,
@@ -129,7 +108,6 @@ private fun TranslateScreenContent(
         }
 
         when {
-            // Loading indicator while in progress (Requirements 4.1, 4.4).
             state.isLoading -> {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -139,7 +117,6 @@ private fun TranslateScreenContent(
                 }
             }
 
-            // Error message on failure (Requirements 1.6, 4.3, 9.5).
             state.errorMessage != null -> {
                 Text(
                     text = state.errorMessage,
@@ -149,7 +126,6 @@ private fun TranslateScreenContent(
                 )
             }
 
-            // Three-field result display (Requirements 1.2, 1.3, 4.2).
             state.result != null -> {
                 ResultDisplay(result = state.result)
             }
@@ -187,7 +163,6 @@ private fun LanguageDropdown(
             expanded = expanded,
             onDismissRequest = { expanded = false },
         ) {
-            // Exactly the four supported languages, no others (Requirement 3.1).
             SupportedLanguage.entries.forEach { language ->
                 DropdownMenuItem(
                     text = { Text(language.label) },
@@ -221,9 +196,8 @@ private fun ResultDisplay(
 }
 
 /**
- * Renders a single labelled result field, showing an empty-field indicator
- * when the value is absent or blank rather than omitting the field
- * (Requirement 1.3).
+ * Renders a single labelled result field, showing an indicator when the value
+ * is absent or blank rather than omitting the field.
  */
 @Composable
 private fun ResultField(
@@ -250,7 +224,7 @@ private fun ResultField(
     }
 }
 
-/** Placeholder shown when a result field is absent or empty (Requirement 1.3). */
+/** Placeholder shown when a result field is absent or empty. */
 private const val EMPTY_FIELD_INDICATOR = "—"
 
 @Preview(showBackground = true)
