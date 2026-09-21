@@ -7,7 +7,7 @@ import type { SupportedLanguage } from "./contract.js";
 
 // Verify against the Google AI Studio console before deploying; Google revises
 // model names and API versions over time.
-const GEMINI_MODEL = "gemini-1.5-flash";
+const GEMINI_MODEL = "gemini-3.6-flash";
 
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
