@@ -88,10 +88,7 @@ describe("Property 2 — provider is NOT invoked when rate-limited", () => {
     vi.spyOn(rateLimiter, "allow").mockReturnValue(false);
     const res = fakeRes();
 
-    await handler(
-      postReq({ text: "hello", targetLanguage: "Spanish" }),
-      res,
-    );
+    await handler(postReq({ text: "hello", targetLanguage: "Spanish" }), res);
 
     expect(res.statusCode).toBe(429);
     expect(provider.translate).not.toHaveBeenCalled();
@@ -142,10 +139,7 @@ describe("Property 2 — provider is NOT invoked when validation fails", () => {
   it("unsupported language is rejected 400 without calling the provider", async () => {
     const res = fakeRes();
 
-    await handler(
-      postReq({ text: "hello", targetLanguage: "Klingon" }),
-      res,
-    );
+    await handler(postReq({ text: "hello", targetLanguage: "Klingon" }), res);
 
     expect(res.statusCode).toBe(400);
     expect(provider.translate).not.toHaveBeenCalled();

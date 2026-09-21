@@ -30,10 +30,10 @@ a strict, predictable JSON response.
 
 ## Components
 
-| Directory              | What it is                                              |
-| ---------------------- | ------------------------------------------------------- |
-| [`android/`](android/) | Native Android client (Kotlin, Jetpack Compose)         |
-| [`proxy/`](proxy/)     | Vercel serverless proxy exposing `POST /api/translate`  |
+| Directory              | What it is                                             |
+| ---------------------- | ------------------------------------------------------ |
+| [`android/`](android/) | Native Android client (Kotlin, Jetpack Compose)        |
+| [`proxy/`](proxy/)     | Vercel serverless proxy exposing `POST /api/translate` |
 
 Each directory has its own README with setup and run instructions.
 
