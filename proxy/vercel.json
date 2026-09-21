@@ -1,7 +1,11 @@
 {
+  "framework": null,
+  "buildCommand": "",
+  "outputDirectory": null,
   "functions": {
     "api/translate.ts": {
       "maxDuration": 30
     }
   }
 }
+
